@@ -25,50 +25,7 @@ parameters:
     type: string
     default: "default"
     description: Owner of the resources.
-  skipRg:
-    type: string
-    default: "false"
-    description: Skip resource group creation.
-  skipOpenAI:
-    type: string
-    default: "false"
-    description: Skip OpenAI resource creation.
-  skipEmbeddingModelDeployment:
-    type: string
-    default: "false"
-    description: Skip embedding model deployment.
-  skipCompletionModelDeployment:
-    type: string
-    default: "false"
-    description: Skip completion model deployment.
-  skipcognitiveSearch:
-    type: string
-    default: "false"
-    description: Skip cognitive search resource creation.
-  skipCosmosDB:
-    type: string
-    default: "false"
-    description: Skip Cosmos DB resource creation.
-  skipBlobStorage:
-    type: string
-    default: "false"
-    description: Skip Blob Storage resource creation.
-  skipAzureContainerApps:
-    type: string
-    default: "false"
-    description: Skip Azure Container Apps resource creation.
-  skipAKS:
-    type: string
-    default: "false"
-    description: Skip AKS resource creation.
-  skipAzureContainerRegistry:
-    type: string
-    default: "false"
-    description: Skip Azure Container Registry resource creation.
-  skipAPIM:
-    type: string
-    default: "false"
-    description: Skip API Management resource creation.
+
   uniqueSuffix:
     type: string
     description: Unique suffix for resource names.
@@ -90,7 +47,6 @@ resources:
   # OpenAI Service
   - type: Microsoft.CognitiveServices/accounts
     apiVersion: 2021-04-30
-    condition: "[equals(parameters('skipOpenAI'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-OpenAIService-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     properties:
@@ -101,10 +57,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
 
-  # Embedding Model Deployment
+    # Embedding Model Deployment
   - type: Microsoft.CognitiveServices/accounts/deployments
     apiVersion: 2021-04-30
-    condition: "[equals(parameters('skipEmbeddingModelDeployment'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-EmbeddingModel-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     properties:
@@ -116,10 +71,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.CognitiveServices/accounts', concat(parameters('resourceGroupPrefix'), '-OpenAIService-', parameters('uniqueSuffix')))]"
 
-  # Completion Model Deployment
+    # Completion Model Deployment
   - type: Microsoft.CognitiveServices/accounts/deployments
     apiVersion: 2021-04-30
-    condition: "[equals(parameters('skipCompletionModelDeployment'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-CompletionModel-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     properties:
@@ -130,10 +84,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.CognitiveServices/accounts', concat(parameters('resourceGroupPrefix'), '-OpenAIService-', parameters('uniqueSuffix')))]"
 
-  # Cosmos DB Account
+    # Cosmos DB Account
   - type: Microsoft.DocumentDB/databaseAccounts
     apiVersion: 2021-04-15
-    condition: "[equals(parameters('skipCosmosDB'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-cosmos-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     properties:
@@ -145,10 +98,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
 
-  # Cosmos DB SQL Database
+    # Cosmos DB SQL Database
   - type: Microsoft.DocumentDB/databaseAccounts/sqlDatabases
     apiVersion: 2021-04-15
-    condition: "[equals(parameters('skipCosmosDB'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-cosmos-', parameters('uniqueSuffix'), '/miyagi')]"
     dependsOn:
       - "[resourceId('Microsoft.DocumentDB/databaseAccounts', concat(parameters('resourceGroupPrefix'), '-cosmos-', parameters('uniqueSuffix')))]"
@@ -156,10 +108,9 @@ resources:
       resource:
         id: miyagi
 
-  # Cosmos DB SQL Container
+    # Cosmos DB SQL Container
   - type: Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers
     apiVersion: 2021-04-15
-    condition: "[equals(parameters('skipCosmosDB'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-cosmos-', parameters('uniqueSuffix'), '/miyagi/recommendations')]"
     dependsOn:
       - "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', concat(parameters('resourceGroupPrefix'), '-cosmos-', parameters('uniqueSuffix'), '/miyagi'))]"
@@ -171,10 +122,9 @@ resources:
             - /partitionKey
           kind: Hash
 
-  # Azure Storage Account
+    # Azure Storage Account
   - type: Microsoft.Storage/storageAccounts
     apiVersion: 2021-04-01
-    condition: "[equals(parameters('skipBlobStorage'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-storage-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     sku:
@@ -185,20 +135,18 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
 
-  # Azure Storage Blob Container
+    # Azure Storage Blob Container
   - type: Microsoft.Storage/storageAccounts/blobServices/containers
     apiVersion: 2021-04-01
-    condition: "[equals(parameters('skipBlobStorage'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-storage-', parameters('uniqueSuffix'), '/default/miyagi')]"
     dependsOn:
       - "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('resourceGroupPrefix'), '-storage-', parameters('uniqueSuffix')))]"
     properties:
       publicAccess: None
 
-  # Azure Container Registry
+    # Azure Container Registry
   - type: Microsoft.ContainerRegistry/registries
     apiVersion: 2021-09-01
-    condition: "[equals(parameters('skipAzureContainerRegistry'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-acr-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     sku:
@@ -207,10 +155,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
 
-  # Azure Container App
+    # Azure Container App
   - type: Microsoft.App/containerApps
     apiVersion: 2022-01-01-preview
-    condition: "[equals(parameters('skipAzureContainerApps'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-containerapp-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     properties:
@@ -230,10 +177,9 @@ resources:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
       - "[resourceId('Microsoft.App/managedEnvironments', concat(parameters('resourceGroupPrefix'), '-env'))]"
 
-  # AKS Cluster
+    # AKS Cluster
   - type: Microsoft.ContainerService/managedClusters
     apiVersion: 2021-05-01
-    condition: "[equals(parameters('skipAKS'), 'false')]"
     name: "[concat(parameters('resourceGroupPrefix'), '-aks-', parameters('uniqueSuffix'))]"
     location: "[parameters('location')]"
     properties:
@@ -260,10 +206,9 @@ resources:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
       - "[resourceId('Microsoft.ContainerRegistry/registries', concat(parameters('resourceGroupPrefix'), '-acr-', parameters('uniqueSuffix')))]"
 
- # Event Hub Namespace
+  # Event Hub Namespace
   - type: Microsoft.EventHub/namespaces
     apiVersion: 2023-01-01-preview
-    condition: "[equals(parameters('skipEventHub'), 'false')]"
     name: "[parameters('eventHubNamespaceName')]"
     location: "[parameters('location')]"
     sku:
@@ -282,23 +227,7 @@ resources:
   # Event Hub
   - type: Microsoft.EventHub/namespaces/eventhubs
     apiVersion: 2023-01-01-preview
-    condition: "[equals(parameters('skipEventHub'), 'false')]"
     name: "[concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubName'))]"
-    properties:
-      retentionDescription:
-        cleanupPolicy: 'Delete'
-        retentionTimeInHours: 1
-      messageRetentionInDays: 1
-      partitionCount: 2
-      status: 'Active'
-    dependsOn:
-      - "[resourceId('Microsoft.EventHub/namespaces', parameters('eventHubNamespaceName'))]"
-
-  # Event Hub Diagnostic Settings
-  - type: Microsoft.EventHub/namespaces/eventhubs
-    apiVersion: 2023-01-01-preview
-    condition: "[equals(parameters('skipEventHub'), 'false')]"
-    name: "[concat(parameters('eventHubNamespaceName'), '/insights-metrics-pt1m')]"
     properties:
       retentionDescription:
         cleanupPolicy: 'Delete'
@@ -312,7 +241,6 @@ resources:
   # Event Hub Authorization Rule
   - type: Microsoft.EventHub/namespaces/eventhubs/authorizationRules
     apiVersion: 2022-10-01-preview
-    condition: "[equals(parameters('skipEventHub'), 'false')]"
     name: "[concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubName'), '/apimLoggerAccessPolicy')]"
     properties:
       rights:
@@ -320,11 +248,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.EventHub/namespaces/eventhubs', concat(parameters('eventHubNamespaceName'), '/', parameters('eventHubName')))]"
 
-
   # API Management Service
   - type: Microsoft.ApiManagement/service
     apiVersion: 2023-05-01-preview
-    condition: "[equals(parameters('skipAPIM'), 'false')]"
     name: "[parameters('apiManagementName')]"
     location: "[parameters('location')]"
     sku:
@@ -340,11 +266,9 @@ resources:
     dependsOn:
       - "[resourceId('Microsoft.Resources/resourceGroups', concat(parameters('resourceGroupPrefix'), '-rg-', parameters('uniqueSuffix')))]"
 
-
   # Cognitive Search Service
   - type: Microsoft.Search/searchServices
     apiVersion: 2021-04-01-Preview
-    condition: "[equals(parameters('skipcognitiveSearch'), 'false')]"
     name: "[parameters('searchServiceName')]"
     location: "[parameters('location')]"
     properties:
